@@ -15,6 +15,9 @@ function App() {
   const [isExpense, setIsExpense] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [entryId, setEntryId] = useState();
+  const [totalIncome, setIncomeTotal] = useState(0);
+  const [totalExpense, setExpenseTotal] = useState(0);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (!isOpen && entryId) {
@@ -24,8 +27,24 @@ function App() {
       newEntries[index].value = value;
       newEntries[index].isExpense = isExpense;
       setEntries(newEntries);
+      resetEntry();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  useEffect(() => {
+    let totalIncome = 0;
+    let totalExpense = 0;
+    entries.map((entry) => {
+      if (entry.isExpense) {
+        return (totalExpense += Number(entry.value));
+      }
+      return (totalIncome += Number(entry.value));
+    });
+    setTotal(totalIncome - totalExpense);
+    setExpenseTotal(totalExpense);
+    setIncomeTotal(totalIncome);
+  }, [entries]);
 
   function deleteEntry(id) {
     const result = entries.filter((r) => r.id !== id);
@@ -44,7 +63,7 @@ function App() {
     }
   }
 
-  function addEntry(description, value, isExpense) {
+  function addEntry() {
     const result = entries.concat({
       id: entries.length + 1,
       description,
@@ -54,13 +73,20 @@ function App() {
     console.log("result", result);
     console.log("entries", entries);
     setEntries(result);
+    resetEntry();
+  }
+
+  function resetEntry() {
+    setDescription("");
+    setValue("");
+    setIsExpense(true);
   }
 
   return (
     <Container>
       <MainHeader title="Budget" />
-      <DisplayBalance title="Your Balance" value="2590.33" size="small" />
-      <DisplayBalances />
+      <DisplayBalance title="Your Balance" value={total} size="small" />
+      <DisplayBalances totalIncome={totalIncome} totalExpense={totalExpense} />
       <MainHeader title="History" type="h3" />
       <EntryLines
         entries={entries}
@@ -98,25 +124,25 @@ var initialEntries = [
   {
     id: 1,
     description: "Work Income",
-    value: "$1000.00",
+    value: 1000.0,
     isExpense: false,
   },
   {
     id: 2,
     description: "Water bill",
-    value: "$20.00",
+    value: 20.0,
     isExpense: true,
   },
   {
     id: 3,
     description: "Rent",
-    value: "$300.00",
+    value: 300.0,
     isExpense: true,
   },
   {
     id: 4,
     description: "Power Bill",
-    value: "$50.00",
+    value: 50.0,
     isExpense: true,
   },
 ];
